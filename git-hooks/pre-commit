@@ -1,0 +1,10 @@
+CURRENT_DIR="$(pwd)"
+
+SIZE_KB=$(du -ck *js | grep total | awk '{ print $1 }')
+ALLOWED_KB=128
+echo $SIZE_KB
+
+if [ "$SIZE_KB" -gt "$ALLOWED_KB" ]; then
+  echo "${SIZE_KB} KB is too big"
+  exit 1
+fi
