@@ -3,6 +3,7 @@ import DOM from "./DOM.js";
 import Vindow from "./Vindow.js";
 import Inspector from "./Inspector.js";
 
+
 var audioElement = document.querySelector("audio");
 let w = Vindow({ title: "Graphic EQ" });
 
@@ -49,10 +50,11 @@ let inspector = Inspector(log);
 let wInspect = Vindow({ title: "Inspector" });
 wInspect.appendToToolbar(
     DOM.button()
-    .append(
+    .addClass('btn btn-sm')
+    .append([
         DOM.i()
-        .addClass('fa fa-copy')
-    )
+        .addClass('fa fa-copy'),
+    ])
     .on('click', inspector.copyTextToClipboard)
 )
 wInspect.append(inspector.ui());

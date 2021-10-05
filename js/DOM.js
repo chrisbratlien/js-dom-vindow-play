@@ -69,33 +69,23 @@ function fromVanilla(raw) {
 
         return self;
     }
-
-    function attrHelper(base, key, value) {
-
-        if (typeof key == 'object' && !value) {
+    self.attr = function(key, value) {
+        if (typeof key == 'object') {
             let props = key;
-            base = {
-                ...base,
-                ...props
-            }
+            Object.keys(props).forEach(prop => { raw[prop] = props[prop]; })
             return self;
         }
         if (typeof value == "undefined") {
             //just reading...
-            return base[key];
+            return raw[key];
         }
         //single prop
-        base[key] = value;
+        raw[key] = value;
         return self;
-    } //attrHelper
-
-    self.attr = function(key, value) {
-        return attrHelper(raw, key, value);
     }
     self.css = function(key, value) {
         if (typeof key == 'object') {
             let props = key;
-            //Object.keys(props).forEach(prop => raw.style.setProperty(prop,props[prop]));
             Object.keys(props).forEach(prop => { raw.style[prop] = props[prop]; })
             return self;
         }
