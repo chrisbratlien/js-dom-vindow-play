@@ -12,7 +12,7 @@ function GraphicEQ(props) {
         })
 
     //console.log('what is canvas', canvas);
-
+    var dataArray;
     var audioCtx = props.audioCtx || props.audioSrc.context;
     var canvasCtx = canvas.raw.getContext('2d');
     var analyser = audioCtx.createAnalyser();
@@ -26,7 +26,8 @@ function GraphicEQ(props) {
 
     analyser.fftSize = 256;
     var bufferLength = analyser.frequencyBinCount;
-    var dataArray = new Uint8Array(bufferLength);
+    dataArray = new Uint8Array(bufferLength);
+    self.dataArray = dataArray;
     canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
     let drawVisual;
 
