@@ -1,4 +1,4 @@
-﻿var DOM = window.DOM || {
+var DOM = window.DOM || {
     regularTagString: 'a,abbr,address,area,article,aside,audio,b,base,bdi,bdo,blockquote,body,br,button,canvas,caption,cite,code,col,colgroup,data,datalist,dd,del,details,dfn,dialog,div,dl,dt,em,embed,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,i,iframe,img,input,ins,kbd,label,legend,li,link,main,map,mark,menu,meta,meter,nav,noscript,object,ol,optgroup,option,output,p,param,picture,pre,progress,q,rp,rt,ruby,s,samp,script,section,select,slot,small,source,span,strong,style,sub,summary,sup,table,tbody,td,template,textarea,tfoot,th,thead,time,title,tr,track,u,ul,var,video,wbr',
     svgTagString: 'circle,ellipse,g,line,path,polygon,polyline,rect,svg,text'
 };
@@ -20,8 +20,10 @@ function fromVanilla(raw) {
         return self[prop];
     }
 
-    self.on = function(eventName, callback) {
-        raw.addEventListener(eventName, callback);
+    self.on = function(eventNames, callback) {
+        eventNames = eventNames.split(/ +/)
+            .filter(o => o)
+        eventNames.map(eventName => raw.addEventListener(eventName, callback));
         return self;
     }
     self.addClass = function(classes) {
@@ -44,6 +46,34 @@ function fromVanilla(raw) {
         self.css('display', null);
         return self;
     }
+    self.hide = function() {
+        self.css('display', 'none');
+        return self;
+    }
+    self.text = function(val) {
+        if (arguments.length == 0) {
+            //just reading
+            return raw.innerText
+        }
+        raw.innerText = val;
+        return self;
+    }
+    self.html = function(val) {
+        if (arguments.length == 0) {
+            //just reading
+            return raw.innerHTML
+        }
+        raw.innerHTML = val;
+        return self;
+    }
+    self.val = function(val) {
+        if (arguments.length == 0) {
+            //just reading
+            return raw.value
+        }
+        raw.value = val;
+        return self;
+    }
     self.append = function() {
 
         let children = [...arguments];
@@ -63,6 +93,9 @@ function fromVanilla(raw) {
             raw.append(children.raw);
             return self;
         }
+        if (children && typeof children == "string") {
+            children = children.replace(/&nbsp;/g, '\u00A0');
+        }
 
         raw.append(children);
 
@@ -75,7 +108,7 @@ function fromVanilla(raw) {
             Object.keys(props).forEach(prop => { raw[prop] = props[prop]; })
             return self;
         }
-        if (typeof value == "undefined") {
+        if (arguments.length == 1) {
             //just reading...
             return raw[key];
         }
@@ -89,7 +122,7 @@ function fromVanilla(raw) {
             Object.keys(props).forEach(prop => { raw.style[prop] = props[prop]; })
             return self;
         }
-        if (typeof value == "undefined") {
+        if (arguments.length == 1) {
             //just reading...
             return raw.style[key];
         }
@@ -153,8 +186,11 @@ combined.forEach(function(tag) {
     }
 });
 
-DOM.from = function(vanilla) {
-    return fromVanilla(vanilla);
+DOM.from = function(vanillaOrSelector) {
+    if (typeof vanillaOrSelector == 'string') {
+        return fromVanilla(document.querySelector(vanillaOrSelector));
+    }
+    return fromVanilla(vanillaOrSelector);
 }
 
 export default DOM;
