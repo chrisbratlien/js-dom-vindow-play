@@ -40,6 +40,13 @@ function fromVanilla(raw) {
         raw.classList.remove(...classes);
         return self;
     }
+    self.toggleClass = function(classes) {
+        classes = classes
+            .split(/ +/)
+            .filter(o => o);
+        classes.map(c => raw.classList.toggle(c));
+        return self;
+    }
     self.empty = function() {
         let item;
         while (item = raw.children.item(0)) {
