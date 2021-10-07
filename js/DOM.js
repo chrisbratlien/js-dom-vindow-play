@@ -33,14 +33,32 @@ function fromVanilla(raw) {
         raw.classList.add(...classes);
         return self;
     }
+    self.removeClass = function(classes) {
+        classes = classes
+            .split(/ +/)
+            .filter(o => o);
+        raw.classList.remove(...classes);
+        return self;
+    }
     self.empty = function() {
         let item;
         while (item = raw.children.item(0)) {
-            console.log('item', item);
+            ////console.log('item', item);
             raw.removeChild(item);
         }
         raw.innerHTML = null;
         return self;
+    }
+    self.remove = function() {
+
+        self.empty()
+        raw.remove();
+        return self;
+    }
+    self.find = function(selector) {
+        let hit = raw.querySelector(selector);
+        if (!hit) { return false; }
+        return DOM.from(hit);
     }
     self.show = function() {
         self.css('display', null);

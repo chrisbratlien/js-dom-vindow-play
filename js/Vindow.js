@@ -23,11 +23,12 @@ function Vindow(props) {
                 DOM.i()
                 .addClass('fa fa-close')
             )
-            .addClass('btn btn-exit')
-            .on('click', () => self.emit('close', self, props))
-
-
-        )
+            .addClass('btn btn-exit btn-close')
+            .on('click', () => {
+                self.emit('close', self, props)
+                outer.raw.remove();
+            })
+        );
 
     outer = DOM.div()
         .addClass('vindow')
