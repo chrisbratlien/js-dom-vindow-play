@@ -2,6 +2,9 @@ import GraphicEQ from "./GraphicEQ.js";
 import DOM from "./DOM.js";
 import Vindow from "./Vindow.js";
 import Inspector from "./Inspector.js";
+import { setBackgroundHue } from "./Utils.js";
+
+import TableEditor from "./TableEditor.js";
 
 
 var audioElement = document.querySelector("audio");
@@ -59,6 +62,33 @@ wInspect.appendToToolbar(
 )
 wInspect.append(inspector.ui());
 wInspect.renderOn(body);
+
+let numRows = 30;
+let data = [...(new Array(numRows)).keys()]
+    .map(emptyRow => {
+        return {
+            Area: Math.round(Math.random() * 300) / 10,
+            Rating: Math.round(Math.random() * 10),
+        }
+    })
+let te = TableEditor(data);
+
+let [teToolbar, tePane] = te.ui();
+let tvin = Vindow({ title: 'Table Editor' });
+tvin.appendToToolbar(teToolbar);
+tvin.append(tePane);
+tvin.renderOn(body);
+
+
+
+let TAU = Math.PI * 2;
+let biggerIsSlower = 500000 // 1_000_000
+let magicHueRadians = (Date.now() / biggerIsSlower) % TAU;
+document.querySelectorAll('.vindow .header').forEach(elem => {
+    setBackgroundHue(elem, magicHueRadians)
+});
+
+
 setInterval(() => {
     log.push({ time: Date.now() })
     inspector.update(log);

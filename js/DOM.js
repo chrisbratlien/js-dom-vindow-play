@@ -83,6 +83,10 @@ function fromVanilla(raw) {
         raw.innerText = val;
         return self;
     }
+    self.focus = function() {
+        raw.focus();
+        return self;
+    }
     self.html = function(val) {
         if (arguments.length == 0) {
             //just reading

@@ -45,25 +45,57 @@
 }
 
 .vindow .resizer.bottom-left {
-    cursor: sw-resize;
+    cursor: nesw-resize;
     bottom: 0;
     left: 0;
 }
 
 .vindow .resizer.top-left {
-    cursor: nw-resize;
+    cursor: nwse-resize;
     top: 0;
     left: 0;
 }
 
 .vindow .resizer.top-right {
-    cursor: ne-resize;
+    cursor: nesw-resize;
     top: 0;
     right: 0;
 }
 
 .vindow .resizer.bottom-right {
-    cursor: se-resize;
+    cursor: nwse-resize;
     bottom: 0;
+    right: 0;
+}
+
+.vindow .resizer.top,
+.vindow .resizer.bottom {
+    cursor: ns-resize;
+    left: 10px;
+    right: 10px;
+    width: calc(100% - 20px);
+}
+
+.vindow .resizer.bottom {
+    bottom: 0;
+}
+
+.vindow .resizer.top {
+    top: 0;
+}
+
+.vindow .resizer.left,
+.vindow .resizer.right {
+    top: 10px;
+    bottom: 10px;
+    height: calc(100% - 20px);
+    cursor: ew-resize;
+}
+
+.vindow .resizer.left {
+    left: 0;
+}
+
+.vindow .resizer.right {
     right: 0;
 }
