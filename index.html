@@ -6,6 +6,7 @@
         @import "css/vindow.css";
         @import "css/flex.css";
         @import "css/align.css";
+        @import "css/drag-and-drop-file.css";
         .vindow .header {
             font-family: sans-serif;
             padding: 3px;
@@ -18,6 +19,25 @@
         .vindow .header .btn-exit {
             border: 0;
             padding: 3px;
+        }
+        /* hexdump*/
+        
+        .hexy-mf {
+            font-family: monospace;
+        }
+        
+        .hexy-mf div {
+            font-family: monospace;
+            overflow-x: hidden;
+            padding: 0 3px;
+            white-space: nowrap;
+        }
+        
+        .hexy-mf .code-column {
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+            max-width: 70%;
+            overflow-x: hidden;
         }
     </style>
 </head>

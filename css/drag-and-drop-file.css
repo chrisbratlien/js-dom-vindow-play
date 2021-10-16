@@ -1,0 +1,10 @@
+.drop-target {
+    border: 2px dashed #ccc;
+    border-radius: 20px;
+    padding: 20px;
+}
+
+.drop-target.highlight {
+    border-color: #409;
+    background: #afa;
+}

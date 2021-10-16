@@ -5,6 +5,8 @@ import Inspector from "./Inspector.js";
 import { setBackgroundHue } from "./Utils.js";
 
 import TableEditor from "./TableEditor.js";
+import hexdump from "./hexdump.js";
+import DragAndDropFile from "./DragAndDropFile.js";
 
 
 var audioElement = document.querySelector("audio");
@@ -88,8 +90,76 @@ document.querySelectorAll('.vindow .header').forEach(elem => {
     setBackgroundHue(elem, magicHueRadians)
 });
 
-
+/*
 setInterval(() => {
     log.push({ time: Date.now() })
     inspector.update(log);
 }, 10000);
+*/
+//let dump = hexdump("HELLO WORLD, HOW ARE YOU DOING?");
+
+//console.log('dump?', dump);
+//inspector.update(dump);
+
+
+function makeHexDumpFrom(dump) {
+    let hexyAF = DOM.div()
+        .addClass('flex-row hexy-mf space-between')
+        .append([
+            DOM.div()
+            .addClass('flex-column addr-column')
+            .append(dump.addrs.map(addr => {
+                return DOM.div()
+                    .addClass('flex-row addr-row')
+                    .append(addr)
+
+            })),
+            DOM.div()
+            .addClass('flex-column code-column')
+            .append(dump.codes.map(codeRow => {
+
+                return DOM.div()
+                    .addClass('flex-row code-row')
+                    .append(codeRow)
+
+
+            })),
+            DOM.div()
+            .addClass('flex-column char-column')
+            .append(dump.chars.map(charRow => {
+                return DOM.div()
+                    .addClass('flex-row char-row')
+                    .append(charRow)
+            }))
+        ])
+
+    let wHex = Vindow({ title: 'Hex Dump' });
+    wHex.append(hexyAF);
+    wHex.renderOn(body);
+
+}
+
+
+
+let dragFile = DragAndDropFile({
+    accept: '*',
+    handleFiles: function(files, b, c) {
+        [...files].forEach(file => {
+                window.file = file;
+                console.log('file?', file);
+                file.text()
+                    .then(data => {
+                        let dump = hexdump(data);
+                        makeHexDumpFrom(dump);
+
+                    })
+
+            })
+            //console.log('a?', a);
+            //inspector.update([a, b, c]);
+
+    }
+});
+///dragFile.renderOn(body);
+
+body.append(dragFile.ui())
