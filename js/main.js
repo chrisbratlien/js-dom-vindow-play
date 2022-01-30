@@ -8,6 +8,8 @@ import TableEditor from "./TableEditor.js";
 import hexdump from "./hexdump.js";
 import DragAndDropFile from "./DragAndDropFile.js";
 
+import {invlerp, lerp,remap} from './Lerpy.js';
+
 
 var audioElement = document.querySelector("audio");
 let w = Vindow({ title: "Graphic EQ" });
@@ -139,6 +141,73 @@ function makeHexDumpFrom(dump) {
 
 }
 
+function processTSV(data) {
+
+    let foo = csvjson.csv2json(data,{ delim: '\t'});
+
+   //console.log('foo',foo);
+
+    return foo.rows;
+    //let lines = data.split(/\r|\n+/);
+    //console.log("lines",lines);
+
+}
+
+
+function renderOCR(ocrData) {
+    console.log('ocrData',ocrData);
+
+    let maxLeft = Math.max(...ocrData.map(row => row.left));
+    let maxRight = Math.max(...ocrData.map(row => row.left + row.width));
+
+    let maxBottom = Math.max(...ocrData.map(row => row.top + row.height));
+
+    //console.log('maxRight',maxRight);
+    //console.log('maxBottom',maxBottom);
+
+    let wrap = DOM.svg()
+    .attr({
+            width: '100%',
+          //  height:300
+        //width: maxRight + 'px',
+        height: maxBottom + 'px'
+    });
+
+
+
+    ocrData.map(row => {
+        //let tLeft1 = invlerp(0,maxRight,row.left);
+        let tLeft = row.left / maxRight;
+        let tTop = row.top / maxBottom;
+
+        let tWidth = row.width / maxRight;
+
+        //console.log('tl1,tl2,r',tLeft1,tLeft2,row);
+        let pctLeft = tLeft * 100;
+        let pctTop = tTop * 100;
+        let pctWidth = tWidth * 100;
+
+        pctTop = Math.round(pctTop);//quantize
+        console.log('pctTop',pctTop,row.text);
+
+
+        wrap.append(DOM.text(row.text)
+            .attr({
+                textAnchor: 'middle',
+                'text-anchor': 'middle',
+                x: pctLeft + '%',
+                y: pctTop + '%',
+                textLength: pctWidth + '%'
+            })
+        )
+
+    });
+
+    let wOCR = Vindow({ title: 'OCR' });
+    wOCR.append(wrap);
+    wOCR.renderOn(body);
+}
+
 
 
 let dragFile = DragAndDropFile({
@@ -152,7 +221,16 @@ let dragFile = DragAndDropFile({
                         let dump = hexdump(data);
                         makeHexDumpFrom(dump);
 
+                        if (file.type == 'text/tab-separated-values') {
+                            //console.log('TSV data',data);
+                            let ocrData = processTSV(data);                            
+                            renderOCR(ocrData);
+                        }
+
                     })
+
+
+
 
             })
             //console.log('a?', a);
