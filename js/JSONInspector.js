@@ -3,8 +3,12 @@ import Vindow from "./Vindow.js";
 import DOM from "./DOM.js";
 
 function JSONInspector(props) {
+    let history = [props];
     let inspector = Inspector(props);
-    let wInspect = Vindow({ title: "JSON Inspector" });
+    let wInspect = Vindow({ 
+        title: "JSON Inspector",
+        className: "json-inspector"
+    });
     wInspect.appendToToolbar(
         DOM.button()
         .addClass('btn btn-sm')
@@ -15,15 +19,27 @@ function JSONInspector(props) {
         .on('click', inspector.copyTextToClipboard)
     )
     
-    var phInspect = DOM.div()
+    let phInspect = DOM.div()
+    let phHistory = DOM.div()
+        .addClass('history')    
     wInspect.append([
         DOM.textarea()
             .on('change',function(e){
                 //console.log(e.target.value);
-                var data = JSON.parse(e.target.value)
+                var data = JSON.parse(e.target.value);
+                history.push(data);
+
+                phHistory.append(
+                    DOM.span("⏰")
+                        .on('click',function(){
+                            inspector.update(data);
+                            inspector.renderOn(phInspect);
+                        })
+                )
                 inspector.update(data);
                 inspector.renderOn(phInspect)
             }),
+            phHistory,
             phInspect
     ]);
     wInspect.append(inspector.ui());

@@ -45,3 +45,7 @@
 .inspector .copier {
     cursor: pointer;
 }
+
+.json-inspector .history span {
+    cursor: pointer;
+}
