@@ -9,6 +9,7 @@ function JSONInspector(props) {
         title: "JSON Inspector",
         className: "json-inspector"
     });
+    /*
     wInspect.appendToToolbar(
         DOM.button()
         .addClass('btn btn-sm')
@@ -18,12 +19,13 @@ function JSONInspector(props) {
         ])
         .on('click', inspector.copyTextToClipboard)
     )
-    
+    */
     let phInspect = DOM.div()
     let phHistory = DOM.div()
         .addClass('history')    
     wInspect.append([
         DOM.textarea()
+            .addClass('full-width')
             .on('change',function(e){
                 //console.log(e.target.value);
                 var data = JSON.parse(e.target.value);
