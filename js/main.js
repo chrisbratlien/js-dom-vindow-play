@@ -9,7 +9,7 @@ import hexdump from "./hexdump.js";
 import DragAndDropFile from "./DragAndDropFile.js";
 
 import {invlerp, lerp,remap} from './Lerpy.js';
-
+import JSONInspector from "./JSONInspector.js";
 
 var audioElement = document.querySelector("audio");
 let w = Vindow({ title: "Graphic EQ" });
@@ -54,30 +54,10 @@ w.renderOn(body);
 
 let log = [];
 let inspector = Inspector(log);
-let wInspect = Vindow({ title: "Inspector" });
-wInspect.appendToToolbar(
-    DOM.button()
-    .addClass('btn btn-sm')
-    .append([
-        DOM.i()
-        .addClass('fa fa-copy'),
-    ])
-    .on('click', inspector.copyTextToClipboard)
-)
 
-var phInspect = DOM.div()
-wInspect.append([
-    DOM.textarea()
-        .on('change',function(e){
-            console.log(e.target.value);
-            var data = JSON.parse(e.target.value)
-            inspector.update(data);
-            inspector.renderOn(phInspect)
-        }),
-        phInspect
-]);
-wInspect.append(inspector.ui());
-wInspect.renderOn(body);
+let jsonInspector = new JSONInspector(log);
+jsonInspector.renderOn(body);
+
 
 let numRows = 30;
 let data = [...(new Array(numRows)).keys()]
