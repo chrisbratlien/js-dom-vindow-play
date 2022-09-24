@@ -1,6 +1,6 @@
 import GraphicEQ from "./GraphicEQ.js";
 import DOM from "./DOM.js";
-import Vindow from "./Vindow.js";
+import Vindow, {allVindows, autoArrange, Point } from "./Vindow.js";
 import Inspector from "./Inspector.js";
 import { setBackgroundHue } from "./Utils.js";
 
@@ -64,6 +64,18 @@ wInspect.appendToToolbar(
     ])
     .on('click', inspector.copyTextToClipboard)
 )
+
+var phInspect = DOM.div()
+wInspect.append([
+    DOM.textarea()
+        .on('change',function(e){
+            console.log(e.target.value);
+            var data = JSON.parse(e.target.value)
+            inspector.update(data);
+            inspector.renderOn(phInspect)
+        }),
+        phInspect
+]);
 wInspect.append(inspector.ui());
 wInspect.renderOn(body);
 
@@ -75,6 +87,9 @@ let data = [...(new Array(numRows)).keys()]
             Rating: Math.round(Math.random() * 10),
         }
     })
+
+inspector.update(data);
+
 let te = TableEditor(data);
 
 let [teToolbar, tePane] = te.ui();
@@ -174,6 +189,7 @@ function renderOCR(ocrData) {
     });
 
 
+    window.ocrData = ocrData;
 
     ocrData.map(row => {
         //let tLeft1 = invlerp(0,maxRight,row.left);
@@ -181,25 +197,42 @@ function renderOCR(ocrData) {
         let tTop = row.top / maxBottom;
 
         let tWidth = row.width / maxRight;
+        let tHeight = row.height / maxBottom;
 
         //console.log('tl1,tl2,r',tLeft1,tLeft2,row);
         let pctLeft = tLeft * 100;
         let pctTop = tTop * 100;
         let pctWidth = tWidth * 100;
+        let pctHeight = tHeight * 100;
 
         pctTop = Math.round(pctTop);//quantize
         console.log('pctTop',pctTop,row.text);
 
 
-        wrap.append(DOM.text(row.text)
+        wrap.append([DOM.text(row.text)
             .attr({
-                textAnchor: 'middle',
-                'text-anchor': 'middle',
+                //textAnchor: 'middle',
+                //'text-anchor': 'middle',
                 x: pctLeft + '%',
                 y: pctTop + '%',
-                textLength: pctWidth + '%'
+                //textLength: pctWidth + '%'
             })
-        )
+        ])
+        if (row.text.length > 0) {
+            wrap.append(
+                DOM.rect()
+                .attr({
+                    x: pctLeft + '%',
+                    y: pctTop + '%',
+                    width: pctWidth + '%',
+                    //height: pctHeight + '%',
+                    height: 10,
+                    stroke: 'black',
+                    fill: 'none'
+                })
+            );
+        }
+
 
     });
 
@@ -239,5 +272,14 @@ let dragFile = DragAndDropFile({
     }
 });
 ///dragFile.renderOn(body);
+
+function myAutoArrange() {
+    var br = document.body.getBoundingClientRect();
+    autoArrange(allVindows, Point(br.left,br.top), Point(br.right,br.bottom));    
+}
+
+var btnAutoArrange = DOM.from('.btn-auto-arrange');
+btnAutoArrange.on('click',myAutoArrange);
+
 
 body.append(dragFile.ui())

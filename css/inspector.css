@@ -1,0 +1,47 @@
+.inspector {
+    font-family: monospace;
+    margin-left: 20px;
+}
+.inspector .inspected-object-kv-slot {
+    margin-left: 20px;
+}
+.inspector span {
+    margin-left: 2px;
+}
+
+.inspector span.v-null {
+    color: grey;
+}
+.inspector span.v-undefined {
+    color: grey;
+}
+.inspector span.v-number {
+    color: red;
+}
+.inspector span.v-string {
+    color: blue;
+}
+.inspector span.v-boolean {
+    color: orange;
+}
+
+.inspector .inspector-k {    
+    font-weight: bold;
+    min-width: 40px;
+}
+.inspector .inspector-v {
+    margin-left: 2px;
+    text-align: right;
+}
+
+
+
+.inspector .revealer {
+    cursor: pointer;
+}
+.inspector .hider {
+    cursor: pointer;
+}
+.inspector .copier {
+    cursor: pointer;
+}

@@ -1,23 +1,80 @@
 import PubSub from "./PubSub.js";
 import Draggable from "./Draggable.js";
 import DOM from "./DOM.js";
+import { ascendingSorter, descendingSorter } from "./Utils.js";
 
-function bringToTop(elem) {
-    document.querySelectorAll('.vindow')
+
+export function Point(x,y) {
+    var self = { x, y };
+    self.lessThan = function(aPoint) {
+        return self.x < aPoint.x && self.y < aPoint.y;
+    }
+    self.max = function(aPoint) {
+        return {
+            x: Math.max(self.x, aPoint.x),
+            y: Math.max(self.y, aPoint.y)
+        }
+    }
+    self.min = function(aPoint) {
+        return {
+            x: Math.min(self.x, aPoint.x),
+            y: Math.min(self.y, aPoint.y)
+        }
+    }
+    return self;
+}
+
+export const allVindows = [];
+
+export function allRawVindows() {
+    return document.querySelectorAll('.vindow')
+}
+
+export function bringToTop(elem) {
+    allRawVindows()
         .forEach(o => {
             o.style.zIndex = o == elem ? 1 : 0;
         });
 }
+export function justXY({ x, y }) {
+    return { x, y };
+}
 
+export function getPropAsFloat(elem,prop) {
+    const result = getComputedStyle(elem, null)
+        .getPropertyValue(prop)
+        .replace(/[a-z].*/,'') //NOTE: parseFloat will get rid of these too...maybe remove this?
+    return parseFloat(result);
+}
 
+export function sortVindowsDesc(vindows) {
+    return vindows.sort(descendingSorter(v => v.area()));
+}
+
+export function autoArrange(vindows, origin, corner) {
+    var sorted = sortVindowsDesc(vindows);
+    var destinations = [origin];
+    sorted.map(function(vindow){
+        var destination = destinations.find(d => 
+            !d.visited && d.x + vindow.extent().x <= corner.x);
+        vindow.moveTo(destination);
+        destination.visited = true;
+        var vo = vindow.origin();
+        var vc = vindow.corner();
+        //after placing, its UR and LL corners become new dests
+        destinations.push(
+            Point(vc.x, vo.y), //UR has priority
+            Point(vo.x, vc.y)  //LL
+        );
+        destinations.sort(descendingSorter(d => d.x)) //RTL
+    });
+}
 
 /*Make resizable div by Hung Nguyen
 https://medium.com/the-z/making-a-resizable-div-in-js-is-not-easy-as-you-think-bda19a1bc53d
 https://codepen.io/ZeroX-DG/pen/vjdoYe
 */
 function makeResizableDiv(element, resizers) {
-    //const element = document.querySelector(div);
-    //const resizers = document.querySelectorAll(div + ' .resizer')
     const minimum_size = 20;
     let original_width = 0;
     let original_height = 0;
@@ -27,17 +84,30 @@ function makeResizableDiv(element, resizers) {
     let original_mouse_y = 0;
     for (let i = 0; i < resizers.length; i++) {
         const currentResizer = resizers[i];
-        currentResizer.addEventListener('mousedown', function(e) {
+
+        function handleDown(e) {
             e.preventDefault()
-            original_width = parseFloat(getComputedStyle(element, null).getPropertyValue('width').replace('px', ''));
-            original_height = parseFloat(getComputedStyle(element, null).getPropertyValue('height').replace('px', ''));
+            bringToTop(element);
+
+            original_width = getPropAsFloat(element, 'width');
+            original_height = getPropAsFloat(element, 'height');
+
             original_x = element.getBoundingClientRect().left;
-            original_y = element.getBoundingClientRect().top;
+
+            original_y = element.offsetTop || element.getBoundingClientRect().top;
             original_mouse_x = e.pageX;
             original_mouse_y = e.pageY;
             window.addEventListener('mousemove', resize)
+            window.addEventListener('touchmove', resize)
+            window.addEventListener('pointermove', resize)
+
             window.addEventListener('mouseup', stopResize)
-        })
+            window.addEventListener('pointerup', stopResize)
+            window.addEventListener('touchend', stopResize)
+        }
+        currentResizer.addEventListener('pointerdown', handleDown);
+        currentResizer.addEventListener('mousedown', handleDown);
+        currentResizer.addEventListener('touchstart', handleDown);
 
         function leftish(e) {
             const width = original_width - (e.pageX - original_mouse_x)
@@ -90,10 +160,14 @@ function makeResizableDiv(element, resizers) {
                 topish(e);
                 leftish(e);
             }
+
+            element.dispatchEvent(new CustomEvent('vindow-resize'), {detail: { element } })
         }
 
         function stopResize() {
             window.removeEventListener('mousemove', resize)
+            window.removeEventListener('touchmove', resize)
+            window.removeEventListener('pointermove', resize)
         }
     }
 }
@@ -141,7 +215,7 @@ function Vindow(props) {
         );
 
     outer = DOM.div()
-        .addClass('vindow')
+        .addClass(`vindow ${props.className ? props.className : ''}`)
         .append(
             ///swHandle,
             ...resizers,
@@ -159,11 +233,14 @@ function Vindow(props) {
             pane = DOM.div()
             .addClass('pane')
         )
-        .on('mousedown', () => {
+        .on('mousedown touchstart', () => {
             bringToTop(outer.raw)
         })
 
-
+    //capture the raw element's CustomEvent emitted witin makeResizableDiv's resize function
+    outer.raw.addEventListener('vindow-resize',function(e){
+        self.emit('resize',{ self, outer, e });
+    });
 
     self.append = function() {
         let children = [...arguments]
@@ -182,6 +259,46 @@ function Vindow(props) {
     self.ui = function() {
         return outer;
     }
+
+    self.getBoundingClientRect = function() {
+        return outer.raw.getBoundingClientRect();
+    }
+    self.origin = function() {
+        var br = self.getBoundingClientRect();
+        return Point(br.x, br.y);
+
+    }
+    self.corner = function() {
+        var br = self.getBoundingClientRect();
+        return Point(br.right, br.bottom);
+    }
+
+
+    self.extent = function() {
+        var br = self.getBoundingClientRect();
+        return Point(br.width, br.height);
+    }
+    self.area = function() {
+        var extent = self.extent();
+        return extent.x * extent.y;        
+    }
+
+    self.moveTo = function(aPoint) {
+        outer.raw.style.left = aPoint.x + 'px';
+        outer.raw.style.top = aPoint.y + 'px';
+    }
+
+
+    self.intersects = function(aVindow) {
+        const maxo = self.origin()
+            .max(aVindow.origin());
+        const minc = self.corner()
+            .min(aVindow.corner());
+        return maxo.lessThan(minc);
+    };
+
+
+
     self.pane = pane;
     self.renderOn = function(wrap) {
         wrap.append(outer);
@@ -189,6 +306,7 @@ function Vindow(props) {
         makeResizableDiv(outer.raw, resizers);
 
     }
+    allVindows.push(self);
     return self;
 }
 export default Vindow;
