@@ -46,7 +46,7 @@ function Inspector(props) {
         }
         var theType = typeof somethingInteresting;
         if (theType === "undefined") {
-            myWrap = DOM.span
+            myWrap = DOM.span()
                 .addClass('inspector-v v-undefined')
                 .html("undefined");
             return;

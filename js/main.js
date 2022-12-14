@@ -11,6 +11,8 @@ import DragAndDropFile from "./DragAndDropFile.js";
 import {invlerp, lerp,remap} from './Lerpy.js';
 import JSONInspector from "./JSONInspector.js";
 
+import Matty from "./Matty.js";
+
 var audioElement = document.querySelector("audio");
 let w = Vindow({ title: "Graphic EQ" });
 
@@ -263,3 +265,6 @@ btnAutoArrange.on('click',myAutoArrange);
 
 
 body.append(dragFile.ui())
+
+let matty = Matty();
+matty.renderOn(body);
