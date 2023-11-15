@@ -112,7 +112,7 @@ function fromVanilla(raw) {
 
         if (Array.isArray(children)) {
             children
-                .filter(o => o)
+                .filter(o => o != null) //reject null, undefined, accept 0
                 .forEach(function(child) {
                     self.append(child);
                 });
